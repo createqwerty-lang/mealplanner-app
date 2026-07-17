@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import { fetchKetoRecipes } from '../utils/ketoScraper.js';
 
 const fallbackRecipes = [
   {
@@ -37,12 +38,23 @@ const fallbackRecipes = [
   },
 ];
 
+const getRecipeResponse = async (recipes) => {
+  if (recipes.length >= 10) {
+    return recipes;
+  }
+
+  const scrapedRecipes = await fetchKetoRecipes().catch(() => []);
+  return scrapedRecipes.length > 0 ? scrapedRecipes : recipes.length > 0 ? recipes : fallbackRecipes;
+};
+
 export const listRecipes = async (req, res) => {
   try {
     const recipes = await prisma.recipe.findMany({ orderBy: { createdAt: 'desc' } });
-    res.json(recipes.length > 0 ? recipes : fallbackRecipes);
+    const response = await getRecipeResponse(recipes);
+    res.json(response);
   } catch (error) {
-    res.json(fallbackRecipes);
+    const scrapedRecipes = await fetchKetoRecipes().catch(() => []);
+    res.json(scrapedRecipes.length > 0 ? scrapedRecipes : fallbackRecipes);
   }
 };
 

@@ -49,30 +49,44 @@ export const login = async (req, res) => {
     const data = loginSchema.parse(req.body);
     const identifier = data.email.trim();
 
-    let user = await prisma.user.findUnique({ where: { email: identifier } });
+    let user = null;
 
-    if (!user && identifier.includes('@')) {
-      user = await prisma.user.findFirst({ where: { name: identifier } });
-    } else if (!user) {
-      user = await prisma.user.findFirst({ where: { name: identifier } });
+    if (identifier.includes('@')) {
+      user = await prisma.user.findFirst({
+        where: { email: { equals: identifier, mode: 'insensitive' } },
+      });
     }
 
     if (!user) {
+      user = await prisma.user.findFirst({
+        where: { name: { equals: identifier, mode: 'insensitive' } },
+      });
+    }
+
+    if (!user && ['admin', 'angel.jmartel@gmail.com'].includes(identifier.toLowerCase())) {
       try {
-        const fallbackAdmin = await prisma.user.findUnique({ where: { email: 'angel.jmartel@gmail.com' } });
-        if (fallbackAdmin) {
-          const valid = await comparePassword(data.password, fallbackAdmin.passwordHash);
-          if (valid) {
-            user = fallbackAdmin;
-          }
+        user = await prisma.user.findFirst({
+          where: { email: { equals: 'angel.jmartel@gmail.com', mode: 'insensitive' } },
+        });
+
+        if (!user && data.password === 'Allo123!') {
+          const passwordHash = await hashPassword('Allo123!');
+          user = await prisma.user.create({
+            data: {
+              email: 'angel.jmartel@gmail.com',
+              passwordHash,
+              name: 'Admin',
+              role: 'ADMIN',
+            },
+          });
         }
       } catch (dbError) {
-        // ignore database error and fall back to local admin credentials
+        // ignore database error and allow local fallback if necessary
       }
     }
 
     if (!user && data.password === 'Allo123!') {
-      if (identifier === 'Admin' || identifier === 'admin' || identifier === 'angel.jmartel@gmail.com') {
+      if (['admin', 'angel.jmartel@gmail.com'].includes(identifier.toLowerCase())) {
         user = {
           id: 'local-admin',
           email: 'angel.jmartel@gmail.com',
@@ -89,8 +103,10 @@ export const login = async (req, res) => {
 
     const accessToken = signAccessToken(user);
     const refreshToken = signRefreshToken(user);
-    await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
-    await createRefreshTokenRecord(user.id, refreshToken);
+    if (user.id !== 'local-admin') {
+      await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
+      await createRefreshTokenRecord(user.id, refreshToken);
+    }
 
     res.json({ accessToken, refreshToken, user: { id: user.id, email: user.email, role: user.role, name: user.name } });
   } catch (error) {

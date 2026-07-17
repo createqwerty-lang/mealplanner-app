@@ -83,5 +83,5 @@ export const fetchKetoRecipes = async () => {
     });
   });
 
-  return recipes.slice(0, 40);
+  return recipes;
 };
