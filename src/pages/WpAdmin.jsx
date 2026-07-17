@@ -143,7 +143,7 @@ export default function WpAdmin() {
                   type="email"
                   value={credentials.email}
                   onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-                  placeholder="angel.jmartel@gmail.com"
+                  placeholder="Votre email admin"
                 />
               </div>
               <div>
@@ -152,9 +152,12 @@ export default function WpAdmin() {
                   type="password"
                   value={credentials.password}
                   onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                  placeholder="Allo123!"
+                  placeholder="Votre mot de passe"
                 />
               </div>
+              <p className="text-xs text-muted-foreground">
+                Pour le test, vous pouvez utiliser le nom d’utilisateur Admin et le mot de passe Allo123!.
+              </p>
               {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
               {message && <Alert><AlertDescription>{message}</AlertDescription></Alert>}
               <Button type="submit" className="w-full">Se connecter</Button>
