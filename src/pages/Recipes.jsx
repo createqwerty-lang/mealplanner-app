@@ -10,8 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export default function Recipes() {
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
-
-  const [category, setCategory] = useState("all");
   const [maxTime, setMaxTime] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
