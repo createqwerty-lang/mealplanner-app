@@ -12,6 +12,7 @@ app.use(cors({ origin: env.corsOrigin.split(','), credentials: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 
+app.get('/', (_req, res) => res.json({ status: 'ok', service: 'mealplanner-backend' }));
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes);
 app.use('/api', contentRoutes);
@@ -21,6 +22,7 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ message: 'Internal server error' });
 });
 
-app.listen(env.port, () => {
-  console.log(`Server running on port ${env.port}`);
+const port = process.env.PORT || env.port || 4000;
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server running on port ${port}`);
 });
