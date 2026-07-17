@@ -18,7 +18,7 @@ services:
     region: oregon
     plan: free
     buildCommand: npm install --prefix server && npm run build --prefix server
-    startCommand: npm start --prefix server
+    startCommand: node server/server.js
     healthCheckPath: /health
     autoDeploy: true
     envVars:
