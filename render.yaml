@@ -10,7 +10,7 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://mealplanner-backend.onrender.com/api
+        value: https://mealplanner-backend-w8ma.onrender.com/api
 
   - type: web
     name: mealplanner-backend
