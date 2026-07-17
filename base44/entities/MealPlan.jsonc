@@ -1,0 +1,46 @@
+{
+  "name": "MealPlan",
+  "type": "object",
+  "properties": {
+    "week_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Date du lundi de la semaine"
+    },
+    "day": {
+      "type": "string",
+      "enum": [
+        "lundi",
+        "mardi",
+        "mercredi",
+        "jeudi",
+        "vendredi",
+        "samedi",
+        "dimanche"
+      ],
+      "description": "Jour de la semaine"
+    },
+    "meal_type": {
+      "type": "string",
+      "enum": [
+        "dejeuner",
+        "diner",
+        "snack",
+        "dessert"
+      ],
+      "description": "Type de repas"
+    },
+    "recipe_id": {
+      "type": "string",
+      "description": "ID de la recette associ\u00e9e"
+    },
+    "recipe_title": {
+      "type": "string",
+      "description": "Titre de la recette (d\u00e9normalis\u00e9)"
+    }
+  },
+  "required": [
+    "day",
+    "meal_type"
+  ]
+}

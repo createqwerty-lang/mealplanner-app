@@ -1,0 +1,82 @@
+{
+  "name": "Recipe",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Nom de la recette"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description courte"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "petit_dejeuner",
+        "dejeuner",
+        "diner",
+        "snack",
+        "dessert"
+      ],
+      "description": "Cat\u00e9gorie du repas"
+    },
+    "prep_time": {
+      "type": "number",
+      "description": "Temps de pr\u00e9paration en minutes"
+    },
+    "cook_time": {
+      "type": "number",
+      "description": "Temps de cuisson en minutes"
+    },
+    "servings": {
+      "type": "number",
+      "description": "Nombre de portions"
+    },
+    "calories": {
+      "type": "number",
+      "description": "Calories par portion"
+    },
+    "fat": {
+      "type": "number",
+      "description": "Lipides en grammes"
+    },
+    "protein": {
+      "type": "number",
+      "description": "Prot\u00e9ines en grammes"
+    },
+    "carbs": {
+      "type": "number",
+      "description": "Glucides nets en grammes"
+    },
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Liste des ingr\u00e9dients"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u00c9tapes de pr\u00e9paration"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL de l'image de la recette"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags (ex: rapide, sans gluten, etc.)"
+    }
+  },
+  "required": [
+    "title",
+    "category"
+  ]
+}

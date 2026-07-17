@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  passwordHash       String
+  name               String?
+  role               Role     @default(USER)
+  emailVerified      Boolean  @default(false)
+  emailVerificationToken String? @unique
+  passwordResetToken String? @unique
+  passwordResetExpires DateTime?
+  refreshTokens      RefreshToken[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+model Recipe {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  category     String
+  imageUrl     String?
+  prepTime     Int?
+  cookTime     Int?
+  servings     Int?
+  calories     Int?
+  fat          Int?
+  protein      Int?
+  carbs        Int?
+  ingredients  String[]
+  steps        String[]
+  tags         String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("recipes")
+}
+
+model MealPlanEntry {
+  id           String   @id @default(cuid())
+  weekStart    String
+  day          String
+  mealType     String
+  recipeId     String
+  recipeTitle  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("meal_plan_entries")
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  firstName    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("newsletter_subscribers")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
