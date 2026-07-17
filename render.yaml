@@ -10,7 +10,7 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://api.mealplanner.com/api
+        value: https://mealplanner-backend-w8ma.onrender.com/api
 
   - type: web
     name: mealplanner-backend
@@ -39,9 +39,9 @@ services:
       - key: JWT_REFRESH_EXPIRES_IN
         value: 7d
       - key: CORS_ORIGIN
-        value: https://mealplanner.com
+        value: https://mealplanner.com,https://mealplanner-frontend-0bql.onrender.com
       - key: APP_URL
-        value: https://mealplanner.com
+        value: https://mealplanner-frontend-0bql.onrender.com
       - key: RESEND_API_KEY
         value: ""
       - key: RESEND_FROM_EMAIL
