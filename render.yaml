@@ -51,4 +51,4 @@ databases:
   - name: mealplanner-db
     databaseName: mealplanner
     user: mealplanner
-    plan: starter
+    plan: free
