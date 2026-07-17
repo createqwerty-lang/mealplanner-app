@@ -34,7 +34,7 @@ function saveStoredAdmin(next) {
 }
 
 export default function WpAdmin() {
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [admin, setAdmin] = useState(getStoredAdmin());
   const [message, setMessage] = useState("");
@@ -65,7 +65,7 @@ export default function WpAdmin() {
 
     try {
       const response = await api.post('/auth/login', {
-        email: credentials.email,
+        email: credentials.username,
         password: credentials.password,
       });
 
@@ -94,7 +94,7 @@ export default function WpAdmin() {
     localStorage.removeItem('refreshToken');
     sessionStorage.removeItem('ketokitchen-admin-session');
     setIsLoggedIn(false);
-    setCredentials({ email: "", password: "" });
+    setCredentials({ username: "", password: "" });
     setMessage("");
   };
 
@@ -138,12 +138,11 @@ export default function WpAdmin() {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Adresse email</label>
+                <label className="text-sm font-medium mb-1.5 block">Nom d’utilisateur</label>
                 <Input
-                  type="email"
-                  value={credentials.email}
-                  onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-                  placeholder="Votre email admin"
+                  value={credentials.username}
+                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                  placeholder="Votre nom d’utilisateur"
                 />
               </div>
               <div>
@@ -155,9 +154,6 @@ export default function WpAdmin() {
                   placeholder="Votre mot de passe"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Pour le test, vous pouvez utiliser le nom d’utilisateur Admin et le mot de passe Allo123!.
-              </p>
               {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
               {message && <Alert><AlertDescription>{message}</AlertDescription></Alert>}
               <Button type="submit" className="w-full">Se connecter</Button>
