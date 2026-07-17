@@ -49,9 +49,67 @@ const getRecipeResponse = async (recipes) => {
 
 export const listRecipes = async (req, res) => {
   try {
-    const recipes = await prisma.recipe.findMany({ orderBy: { createdAt: 'desc' } });
-    const response = await getRecipeResponse(recipes);
-    res.json(response);
+    const {
+      category,
+      q,
+      maxTime,
+      maxCalories,
+      maxCarbs,
+      tags,
+      sort,
+      page = 1,
+      limit = 100,
+    } = req.query;
+
+    const take = Math.min(Number(limit) || 100, 500);
+    const skip = (Math.max(Number(page) || 1, 1) - 1) * take;
+
+    // If DB configured, run Prisma query with filters
+    if (env.databaseUrl) {
+      const where = {};
+      if (category) where.category = { equals: category };
+      if (q) where.OR = [{ title: { contains: q, mode: 'insensitive' } }, { description: { contains: q, mode: 'insensitive' } }];
+      if (maxCalories) where.calories = { lte: Number(maxCalories) };
+      if (maxCarbs) where.carbs = { lte: Number(maxCarbs) };
+      if (maxTime) where.AND = [{ OR: [{ prepTime: { lte: Number(maxTime) } }, { cookTime: { lte: Number(maxTime) } } ] }];
+      if (tags) {
+        const tagList = Array.isArray(tags) ? tags : String(tags).split(',').map((t) => t.trim()).filter(Boolean);
+        if (tagList.length) where.tags = { hasSome: tagList };
+      }
+
+      const orderBy = {};
+      if (sort === 'time') orderBy.prepTime = 'asc';
+      else if (sort === 'calories') orderBy.calories = 'desc';
+      else orderBy.createdAt = 'desc';
+
+      const recipes = await prisma.recipe.findMany({ where, orderBy, take, skip });
+      return res.json(recipes);
+    }
+
+    // Fallback: use scraper or seeded data and filter in-memory
+    let recipes = await fetchKetoRecipes().catch(() => fallbackRecipes);
+
+    if (q) {
+      const term = q.toLowerCase();
+      recipes = recipes.filter((r) => (r.title || '').toLowerCase().includes(term) || (r.description || '').toLowerCase().includes(term));
+    }
+
+    if (category) recipes = recipes.filter((r) => String(r.category || '').toLowerCase() === String(category).toLowerCase());
+    if (maxCalories) recipes = recipes.filter((r) => (r.calories || 0) <= Number(maxCalories));
+    if (maxCarbs) recipes = recipes.filter((r) => (r.carbs || 0) <= Number(maxCarbs));
+    if (maxTime) recipes = recipes.filter((r) => ((r.prepTime || 0) + (r.cookTime || 0)) <= Number(maxTime));
+    if (tags) {
+      const tagList = Array.isArray(tags) ? tags : String(tags).split(',').map((t) => t.trim()).filter(Boolean);
+      recipes = recipes.filter((r) => tagList.every((t) => (r.tags || []).includes(t)));
+    }
+
+    if (sort === 'time') recipes = recipes.sort((a, b) => ((a.prepTime || 0) + (a.cookTime || 0)) - ((b.prepTime || 0) + (b.cookTime || 0)));
+    else if (sort === 'calories') recipes = recipes.sort((a, b) => (b.calories || 0) - (a.calories || 0));
+    else recipes = recipes; // keep order from scraper
+
+    const start = skip;
+    const paged = recipes.slice(start, start + take);
+    return res.json(paged);
   } catch (error) {
     const scrapedRecipes = await fetchKetoRecipes().catch(() => []);
     res.json(scrapedRecipes.length > 0 ? scrapedRecipes : fallbackRecipes);

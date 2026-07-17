@@ -109,8 +109,16 @@ export const fetchKetoRecipes = async () => {
 
     if (!title) return;
 
-    const category = 'dejeuner';
+    // Determine section header (e.g., Breakfast, Lunches, Dinners)
+    let section = '';
+    try {
+      section = $(el).closest('.summary-item-list').prevAll('.summary-block-header').first().find('.summary-header-text').text().trim();
+    } catch (e) {
+      section = '';
+    }
+
     const frenchTitle = toFrenchTitle(title);
+    const category = categoryMap[section] || (section ? section.toLowerCase() : 'dejeuner');
     recipes.push({
       id: `${slugify(frenchTitle)}-${recipes.length + 1}`,
       title: frenchTitle,
