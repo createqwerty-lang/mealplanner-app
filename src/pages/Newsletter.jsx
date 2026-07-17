@@ -135,7 +135,7 @@ export default function Newsletter() {
                   </div>
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <Button type="submit" className="w-full rounded-xl h-11 gap-2" disabled={loading}>
-                    {loading ? "Inscription en cours…" : (
+                    {loading ? "Inscription réussie !" : (
                       <>
                         <Mail className="w-4 h-4" />
                         Recevoir mon meal planner
