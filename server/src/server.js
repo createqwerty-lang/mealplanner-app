@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { execSync } from 'child_process';
+import path from 'path';
 import authRoutes from './routes/authRoutes.js';
 import contentRoutes from './routes/contentRoutes.js';
 import { env } from './config/env.js';
@@ -23,6 +25,19 @@ app.use((err, _req, res, _next) => {
 });
 
 const port = process.env.PORT || env.port || 4000;
+
+const initializeDatabase = () => {
+  try {
+    const cwd = path.resolve(process.cwd(), 'server');
+    execSync('npx prisma migrate deploy', { cwd, stdio: 'inherit' });
+    execSync('node prisma/seed.js', { cwd, stdio: 'inherit' });
+  } catch (error) {
+    console.warn('Database initialization skipped or failed:', error.message);
+  }
+};
+
+initializeDatabase();
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
 });
