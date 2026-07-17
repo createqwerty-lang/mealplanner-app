@@ -9,6 +9,14 @@ const categoryLabels = {
   diner: "Dîner",
   snack: "Snack",
   dessert: "Dessert",
+  Breakfast: "Petit-déjeuner",
+  Lunches: "Déjeuner",
+  Dinners: "Dîner",
+  "Appetizers and Snacks": "Entrées et snacks",
+  Desserts: "Desserts",
+  Drinks: "Boissons",
+  "Side Dishes": "Accompagnements",
+  "Dairy Free": "Sans lactose",
 };
 
 export default function RecipeCard({ recipe, compact = false }) {
@@ -17,7 +25,7 @@ export default function RecipeCard({ recipe, compact = false }) {
       <div className="rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
         <div className={`relative overflow-hidden ${compact ? "h-36" : "h-48"}`}>
           <img
-            src={recipe.image_url || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600"}
+            src={recipe.imageUrl || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600"}
             alt={recipe.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -40,10 +48,10 @@ export default function RecipeCard({ recipe, compact = false }) {
           )}
 
           <div className={`flex items-center gap-3 text-xs text-muted-foreground ${compact ? "mt-2" : "mt-3"}`}>
-            {recipe.prep_time && (
+            {(recipe.prepTime || recipe.cookTime) && (
               <span className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
-                {(recipe.prep_time || 0) + (recipe.cook_time || 0)} min
+                {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
               </span>
             )}
             {recipe.calories && (

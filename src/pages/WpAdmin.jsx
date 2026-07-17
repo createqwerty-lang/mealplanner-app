@@ -65,7 +65,7 @@ export default function WpAdmin() {
 
     try {
       const response = await api.post('/auth/login', {
-        email: credentials.username,
+        username: credentials.username,
         password: credentials.password,
       });
 

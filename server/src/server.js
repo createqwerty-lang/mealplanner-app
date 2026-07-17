@@ -27,6 +27,11 @@ app.use((err, _req, res, _next) => {
 const port = process.env.PORT || env.port || 4000;
 
 const initializeDatabase = () => {
+  if (!env.databaseUrl) {
+    console.warn('DATABASE_URL not set; skipping database initialization.');
+    return;
+  }
+
   try {
     const cwd = path.resolve(process.cwd(), 'server');
     execSync('npx prisma migrate deploy', { cwd, stdio: 'inherit' });

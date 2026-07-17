@@ -48,8 +48,54 @@ const toFrenchTitle = (title) => {
     'Keto Taco Salad': 'Salade taco keto',
   };
 
-  return translations[normalized] || normalized;
+  if (translations[normalized]) {
+    return translations[normalized];
+  }
+
+  const replacements = [
+    [/\bKeto\b/gi, 'keto'],
+    [/\bEggs\b/gi, 'Œufs'],
+    [/\bEgg\b/gi, 'Œuf'],
+    [/\bBacon\b/gi, 'Bacon'],
+    [/\bTaco\b/gi, 'Taco'],
+    [/\bBurger\b/gi, 'Burger'],
+    [/\bChicken\b/gi, 'Poulet'],
+    [/\bSalad\b/gi, 'Salade'],
+    [/\bPancakes\b/gi, 'Pancakes'],
+    [/\bWaffles\b/gi, 'Gaufres'],
+    [/\bCoffee Cake\b/gi, 'Cake'],
+    [/\bFrench Toast\b/gi, 'Pain perdu'],
+    [/\bPumpkin Spice\b/gi, 'Épices de citrouille'],
+    [/\bClassic\b/gi, 'Classique'],
+    [/\bLow Carb\b/gi, 'faible en glucides'],
+    [/\bMini\b/gi, 'Mini'],
+    [/\bPudding\b/gi, 'Pudding'],
+    [/\bMuffins\b/gi, 'Muffins'],
+    [/\bSandwich\b/gi, 'Sandwich'],
+    [/\bCrepes\b/gi, 'Crêpes'],
+    [/\bChaffles\b/gi, 'Chaffles'],
+    [/\bChaffle\b/gi, 'Chaffle'],
+    [/\bDonut Holes\b/gi, 'Donuts'],
+    [/\bCoffee Cake\b/gi, 'Cake'],
+  ];
+
+  let frenchTitle = normalized;
+  replacements.forEach(([search, replace]) => {
+    frenchTitle = frenchTitle.replace(search, replace);
+  });
+
+  return frenchTitle;
 };
+
+const slugify = (value) =>
+  value
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
 export const fetchKetoRecipes = async () => {
   const response = await axios.get(SOURCE_URL, { timeout: 30000, headers: { 'User-Agent': 'Mozilla/5.0' } });
@@ -59,17 +105,18 @@ export const fetchKetoRecipes = async () => {
 
   cards.each((_, el) => {
     const title = $(el).find('.summary-title').text().trim();
-    const href = $(el).find('a').attr('href');
-    const image = $(el).find('img').attr('src');
+    const image = $(el).find('img').attr('src') || $(el).find('img').attr('data-image') || $(el).find('img').attr('data-src');
 
     if (!title) return;
 
     const category = 'dejeuner';
+    const frenchTitle = toFrenchTitle(title);
     recipes.push({
-      title: toFrenchTitle(title),
+      id: `${slugify(frenchTitle)}-${recipes.length + 1}`,
+      title: frenchTitle,
       description: `Recette keto inspirée de ${title}.`,
       category,
-      imageUrl: image || 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800',
+      imageUrl: image ? image.replace(/\?format=\d+w$/, '?format=800w') : 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800',
       prepTime: 10 + (recipes.length % 10),
       cookTime: 8 + (recipes.length % 7),
       servings: 2,

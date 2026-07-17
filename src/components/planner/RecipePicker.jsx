@@ -68,7 +68,7 @@ export default function RecipePicker({ open, onClose, onSelect, mealType }) {
                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
               >
                 <img
-                  src={recipe.image_url || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=100"}
+                  src={recipe.imageUrl || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=100"}
                   alt=""
                   className="w-12 h-12 rounded-lg object-cover shrink-0"
                 />

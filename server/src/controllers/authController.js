@@ -47,20 +47,26 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const data = loginSchema.parse(req.body);
-    const identifier = data.email.trim();
+    const identifier = (data.email || data.username || '').trim();
 
     let user = null;
+    if (env.databaseUrl) {
+      try {
+        if (identifier.includes('@')) {
+          user = await prisma.user.findFirst({
+            where: { email: { equals: identifier, mode: 'insensitive' } },
+          });
+        }
 
-    if (identifier.includes('@')) {
-      user = await prisma.user.findFirst({
-        where: { email: { equals: identifier, mode: 'insensitive' } },
-      });
-    }
-
-    if (!user) {
-      user = await prisma.user.findFirst({
-        where: { name: { equals: identifier, mode: 'insensitive' } },
-      });
+        if (!user) {
+          user = await prisma.user.findFirst({
+            where: { name: { equals: identifier, mode: 'insensitive' } },
+          });
+        }
+      } catch (dbErr) {
+        console.warn('Database lookup failed in login, continuing with fallback', dbErr.message);
+        user = null;
+      }
     }
 
     if (!user && ['admin', 'angel.jmartel@gmail.com'].includes(identifier.toLowerCase())) {

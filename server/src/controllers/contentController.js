@@ -61,8 +61,17 @@ export const listRecipes = async (req, res) => {
 export const getRecipe = async (req, res) => {
   try {
     const recipe = await prisma.recipe.findUnique({ where: { id: req.params.id } });
-    if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
-    res.json(recipe);
+    if (recipe) {
+      return res.json(recipe);
+    }
+
+    const scrapedRecipes = await fetchKetoRecipes().catch(() => []);
+    const fallbackRecipe = scrapedRecipes.find((item) => item.id === req.params.id);
+    if (fallbackRecipe) {
+      return res.json(fallbackRecipe);
+    }
+
+    return res.status(404).json({ message: 'Recipe not found' });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch recipe' });
   }

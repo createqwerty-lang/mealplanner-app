@@ -51,7 +51,7 @@ export default function RecipeDetail() {
     );
   }
 
-  const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+  const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -64,7 +64,7 @@ export default function RecipeDetail() {
       {/* Header Image */}
       <div className="rounded-2xl overflow-hidden h-64 sm:h-80 mb-8">
         <img
-          src={recipe.image_url || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800"}
+          src={recipe.imageUrl || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800"}
           alt={recipe.title}
           className="w-full h-full object-cover"
         />
