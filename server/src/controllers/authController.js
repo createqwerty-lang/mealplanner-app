@@ -87,6 +87,30 @@ export const me = async (req, res) => {
   res.json({ user: req.user });
 };
 
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, password } = req.body;
+    const updates = {};
+
+    if (name && name.trim()) {
+      updates.name = name.trim();
+    }
+
+    if (password && password.trim()) {
+      updates.passwordHash = await hashPassword(password.trim());
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updates,
+    });
+
+    res.json({ user: { id: updatedUser.id, email: updatedUser.email, role: updatedUser.role, name: updatedUser.name } });
+  } catch (error) {
+    res.status(400).json({ message: error.message || 'Profile update failed' });
+  }
+};
+
 export const logout = async (req, res) => {
   try {
     const { refreshToken } = req.body;

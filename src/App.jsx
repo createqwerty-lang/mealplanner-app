@@ -12,6 +12,7 @@ import Recipes from './pages/Recipes';
 import RecipeDetail from './pages/RecipeDetail';
 import MealPlanner from './pages/MealPlanner';
 import Newsletter from './pages/Newsletter';
+import WpAdmin from './pages/WpAdmin';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -47,6 +48,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/wp-admin" element={<WpAdmin />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/recettes" element={<Recipes />} />

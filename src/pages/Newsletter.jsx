@@ -33,22 +33,26 @@ export default function Newsletter() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!email) { setError("Veuillez entrer votre adresse email."); return; }
-
-    setLoading(true);
-
-    // Check if already subscribed
-    const existing = await api.post('/subscribers', { email, firstName });
-    if (existing.data?.id) {
-      setError("Cette adresse email est déjà inscrite à notre newsletter.");
-      setLoading(false);
+    if (!email) {
+      setError("Veuillez entrer votre adresse email.");
       return;
     }
 
-    await api.post('/subscribers', { email, firstName });
+    setLoading(true);
 
-    setSuccess(true);
-    setLoading(false);
+    try {
+      await api.post('/subscribers', { email, firstName });
+      setSuccess(true);
+    } catch (error) {
+      const isDuplicate = error?.response?.status === 500;
+      setError(
+        isDuplicate
+          ? "Cette adresse email est déjà inscrite à notre newsletter."
+          : "Une erreur est survenue, veuillez réessayer."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -91,9 +95,9 @@ export default function Newsletter() {
             {success ? (
               <div className="text-center py-6">
                 <CheckCircle className="w-14 h-14 text-primary mx-auto mb-4" />
-                <h2 className="font-heading text-2xl font-bold mb-2">Bienvenue !</h2>
+                <h2 className="font-heading text-2xl font-bold mb-2">Inscription réussie !</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Vous êtes inscrit(e) 🎉 Vérifiez votre boîte mail pour confirmer votre inscription. Votre premier meal planner arrive lundi !
+                  Vous êtes inscrit(e) 🎉 Vérifiez votre boîte mail pour confirmer votre abonnement. Votre premier meal planner arrive lundi !
                 </p>
               </div>
             ) : (

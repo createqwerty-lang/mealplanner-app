@@ -4,7 +4,6 @@ import { Egg, Sun, Moon, Cookie, CakeSlice } from "lucide-react";
 
 const categories = [
   { value: "all", label: "Tout", icon: null },
-  { value: "petit_dejeuner", label: "Petit-déj", icon: Egg },
   { value: "dejeuner", label: "Déjeuner", icon: Sun },
   { value: "diner", label: "Dîner", icon: Moon },
   { value: "snack", label: "Snack", icon: Cookie },
