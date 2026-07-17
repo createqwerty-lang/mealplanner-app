@@ -5,8 +5,12 @@ const getBaseUrl = () => {
     return import.meta.env.VITE_API_URL;
   }
 
-  if (window.location.hostname.includes('render')) {
+  const hostname = window.location.hostname;
+  if (hostname.includes('render')) {
     return 'https://mealplanner-backend-w8ma.onrender.com/api';
+  }
+  if (hostname.includes('mealplanner.com')) {
+    return 'https://api.mealplanner.com/api';
   }
 
   return 'http://localhost:4000/api';
