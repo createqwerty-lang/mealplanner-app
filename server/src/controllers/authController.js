@@ -72,12 +72,14 @@ export const login = async (req, res) => {
     }
 
     if (!user && data.password === 'Allo123!') {
-      user = {
-        id: 'local-admin',
-        email: 'angel.jmartel@gmail.com',
-        role: 'ADMIN',
-        name: 'Admin',
-      };
+      if (identifier === 'Admin' || identifier === 'admin' || identifier === 'angel.jmartel@gmail.com') {
+        user = {
+          id: 'local-admin',
+          email: 'angel.jmartel@gmail.com',
+          role: 'ADMIN',
+          name: 'Admin',
+        };
+      }
     }
 
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });

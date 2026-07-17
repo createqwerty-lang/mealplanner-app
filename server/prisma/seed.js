@@ -1,7 +1,8 @@
 import prisma from '../src/config/prisma.js';
 import { hashPassword } from '../src/utils/auth.js';
+import { fetchKetoRecipes } from '../src/utils/ketoScraper.js';
 
-const recipes = [
+const fallbackRecipes = [
   {
     title: 'Bowl keto de saumon',
     description: 'Un bowl riche en bonnes graisses, parfait pour un dîner facile.',
@@ -133,6 +134,9 @@ const recipes = [
 ];
 
 async function main() {
+  const scrapedRecipes = await fetchKetoRecipes().catch(() => []);
+  const recipes = scrapedRecipes.length > 0 ? scrapedRecipes : fallbackRecipes;
+
   await prisma.recipe.createMany({ data: recipes, skipDuplicates: true });
   await prisma.newsletterSubscriber.createMany({
     data: [{ email: 'demo@example.com', firstName: 'Demo' }],
