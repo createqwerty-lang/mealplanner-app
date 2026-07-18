@@ -22,8 +22,15 @@ const categoryLabels = {
 export default function RecipePicker({ open, onClose, onSelect, mealType }) {
   const [search, setSearch] = useState("");
 
+  const categorySynonyms = {
+    dejeuner: ['petit_dejeuner', 'dejeuner', 'Breakfast', 'breakfast'],
+    diner: ['diner', 'souper', 'Dinners', 'dinner'],
+    snack: ['snack', 'snacks', 'Appetizers and Snacks'],
+    dessert: ['dessert', 'desserts', 'Desserts'],
+  };
+
   const { data: recipes = [] } = useQuery({
-    queryKey: ["recipes-all"],
+    queryKey: ["recipes", mealType || 'all'],
     queryFn: async () => {
       const response = await api.get('/recipes');
       return response.data;
@@ -31,9 +38,13 @@ export default function RecipePicker({ open, onClose, onSelect, mealType }) {
   });
 
   const filtered = recipes.filter((r) => {
-    const matchSearch =
-      !search || r.title?.toLowerCase().includes(search.toLowerCase());
-    return matchSearch;
+    const matchSearch = !search || r.title?.toLowerCase().includes(search.toLowerCase());
+    if (!matchSearch) return false;
+
+    if (!mealType) return true;
+
+    const allowed = categorySynonyms[mealType] || [mealType];
+    return allowed.map((a) => String(a).toLowerCase()).includes(String(r.category || '').toLowerCase());
   });
 
   return (

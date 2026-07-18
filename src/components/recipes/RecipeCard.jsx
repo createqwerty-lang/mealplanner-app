@@ -47,6 +47,12 @@ export default function RecipeCard({ recipe, compact = false }) {
             </p>
           )}
 
+          {!compact && recipe.ingredients && recipe.ingredients.length > 0 && (
+            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+              {recipe.ingredients.slice(0, 3).map((i) => i.replace(/\s*\(.+\)$/, "")).join(", ")}
+            </p>
+          )}
+
           <div className={`flex items-center gap-3 text-xs text-muted-foreground ${compact ? "mt-2" : "mt-3"}`}>
             {(recipe.prepTime || recipe.cookTime) && (
               <span className="flex items-center gap-1">

@@ -123,7 +123,7 @@ export default function Home() {
                 disabled={generating}
               >
                 {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {generating ? "Génération…" : "Générer mon menu"}
+                {generating ? "En création…" : "Générer mon menu"}
               </Button>
             </div>
           </div>

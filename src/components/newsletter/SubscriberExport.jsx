@@ -21,7 +21,10 @@ export default function SubscriberExport() {
     const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const lines = [headers.join(",")];
     for (const r of rows) {
-      lines.push(headers.map((h) => escape(r[h])).join(","));
+      const email = r.email || r.emailAddress || r.email_address || '';
+      const firstName = r.firstName || r.first_name || '';
+      const created = r.createdAt || r.created_date || '';
+      lines.push([escape(email), escape(firstName), escape(created)].join(","));
     }
     return lines.join("\n");
   };
@@ -37,9 +40,9 @@ export default function SubscriberExport() {
         "abonnes.json",
         JSON.stringify(
           subscribers.map((s) => ({
-            email: s.email,
-            first_name: s.first_name || "",
-            created_date: s.created_date,
+            email: s.email || s.emailAddress || '',
+            first_name: s.firstName || s.first_name || '',
+            created_date: s.createdAt || s.created_date || '',
           })),
           null,
           2

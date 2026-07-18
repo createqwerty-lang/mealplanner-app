@@ -29,6 +29,7 @@ export default function MealPlanner() {
       return response.data;
     },
   });
+  const [autoGenerating, setAutoGenerating] = useState(false);
 
   const addMeal = useMutation({
     mutationFn: (data) => api.post('/meal-plan', data),
@@ -62,6 +63,59 @@ export default function MealPlanner() {
     }
     queryClient.invalidateQueries({ queryKey: ["mealplan", weekStart] });
   };
+
+  // Auto-generate week menu when planner is empty on first successful fetch
+  React.useEffect(() => {
+    let mounted = true;
+    const tryAutoGenerate = async () => {
+      if (!mounted) return;
+      if (autoGenerating) return;
+      if (meals.length > 0) return;
+
+      setAutoGenerating(true);
+
+      try {
+        const response = await api.get('/recipes');
+        const allRecipes = response.data;
+        if (!allRecipes || allRecipes.length === 0) return;
+
+        const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+        const byCategory = (cats) => shuffle(allRecipes.filter((r) => cats.includes(r.category)));
+        const pools = {
+          dejeuner: byCategory(['petit_dejeuner', 'dejeuner', 'Breakfast']),
+          diner: byCategory(['diner', 'souper', 'Dinners']),
+          snack: byCategory(['snack', 'snacks']),
+          dessert: byCategory(['dessert', 'Desserts']),
+        };
+        const counters = { dejeuner: 0, diner: 0, snack: 0, dessert: 0 };
+
+        const newMeals = [];
+        for (const day of days) {
+          for (const meal_type of ['dejeuner', 'diner', 'snack', 'dessert']) {
+            const pool = pools[meal_type];
+            if (pool && pool.length > 0) {
+              const recipe = pool[counters[meal_type] % pool.length];
+              counters[meal_type]++;
+              newMeals.push({ week_start: weekStart, day, meal_type, recipe_id: recipe.id, recipe_title: recipe.title });
+            }
+          }
+        }
+
+        // Clear existing (should be none) then post new meals
+        const existing = await api.get('/meal-plan', { params: { weekStart } });
+        for (const m of existing.data) await api.delete(`/meal-plan/${m.id}`);
+        for (const meal of newMeals) await api.post('/meal-plan', meal);
+        queryClient.invalidateQueries({ queryKey: ["mealplan", weekStart] });
+      } catch (e) {
+        // ignore
+      } finally {
+        if (mounted) setAutoGenerating(false);
+      }
+    };
+
+    tryAutoGenerate();
+    return () => { mounted = false; };
+  }, [meals, weekStart, queryClient, autoGenerating]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
