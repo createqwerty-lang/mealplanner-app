@@ -5,9 +5,9 @@ import { authenticate, authorize } from '../middleware/auth.js';
 const router = Router();
 router.get('/recipes', listRecipes);
 router.get('/recipes/:id', getRecipe);
-router.get('/meal-plan', authenticate, listMealPlan);
-router.post('/meal-plan', authenticate, createMealPlanEntry);
-router.delete('/meal-plan/:id', authenticate, deleteMealPlanEntry);
+router.get('/meal-plan', listMealPlan);
+router.post('/meal-plan', createMealPlanEntry);
+router.delete('/meal-plan/:id', deleteMealPlanEntry);
 router.get('/subscribers', authenticate, authorize('ADMIN'), listSubscribers);
 router.post('/subscribers', createSubscriber);
 
