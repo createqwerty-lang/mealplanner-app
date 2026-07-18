@@ -1,5 +1,9 @@
 import prisma from '../config/prisma.js';
 import { fetchKetoRecipes } from '../utils/ketoScraper.js';
+import { env } from '../config/env.js';
+
+// In-memory meal plan store used when DATABASE_URL is not set (local dev)
+const memoryMealPlans = {};
 
 const fallbackRecipes = [
   {
@@ -137,6 +141,12 @@ export const getRecipe = async (req, res) => {
 
 export const listMealPlan = async (req, res) => {
   try {
+    if (!env.databaseUrl) {
+      const week = req.query.weekStart;
+      const entries = memoryMealPlans[week] || [];
+      return res.json(entries);
+    }
+
     const entries = await prisma.mealPlanEntry.findMany({ where: { weekStart: req.query.weekStart } });
     res.json(entries);
   } catch (error) {
@@ -146,6 +156,22 @@ export const listMealPlan = async (req, res) => {
 
 export const createMealPlanEntry = async (req, res) => {
   try {
+    if (!env.databaseUrl) {
+      const week = req.body.week_start || req.body.weekStart || 'unknown';
+      const entry = {
+        id: `mem-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        weekStart: req.body.week_start || req.body.weekStart || week,
+        day: req.body.day,
+        mealType: req.body.meal_type || req.body.mealType,
+        recipeId: req.body.recipe_id || req.body.recipeId,
+        recipeTitle: req.body.recipe_title || req.body.recipeTitle,
+        createdAt: new Date().toISOString(),
+      };
+      memoryMealPlans[week] = memoryMealPlans[week] || [];
+      memoryMealPlans[week].push(entry);
+      return res.status(201).json(entry);
+    }
+
     const entry = await prisma.mealPlanEntry.create({ data: req.body });
     res.status(201).json(entry);
   } catch (error) {
@@ -155,6 +181,18 @@ export const createMealPlanEntry = async (req, res) => {
 
 export const deleteMealPlanEntry = async (req, res) => {
   try {
+    if (!env.databaseUrl) {
+      const id = req.params.id;
+      for (const week in memoryMealPlans) {
+        const idx = memoryMealPlans[week].findIndex((e) => e.id === id);
+        if (idx !== -1) {
+          memoryMealPlans[week].splice(idx, 1);
+          return res.json({ message: 'Deleted' });
+        }
+      }
+      return res.status(404).json({ message: 'Not found' });
+    }
+
     await prisma.mealPlanEntry.delete({ where: { id: req.params.id } });
     res.json({ message: 'Deleted' });
   } catch (error) {
