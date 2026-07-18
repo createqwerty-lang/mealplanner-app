@@ -122,9 +122,11 @@ export const listRecipes = async (req, res) => {
 
 export const getRecipe = async (req, res) => {
   try {
-    const recipe = await prisma.recipe.findUnique({ where: { id: req.params.id } });
-    if (recipe) {
-      return res.json(recipe);
+    if (env.databaseUrl) {
+      const recipe = await prisma.recipe.findUnique({ where: { id: req.params.id } });
+      if (recipe) {
+        return res.json(recipe);
+      }
     }
 
     const scrapedRecipes = await fetchKetoRecipes().catch(() => []);
@@ -158,13 +160,22 @@ export const createMealPlanEntry = async (req, res) => {
   try {
     if (!env.databaseUrl) {
       const week = req.body.week_start || req.body.weekStart || 'unknown';
+      const id = `mem-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+      const weekVal = req.body.week_start || req.body.weekStart || week;
+      const mealTypeVal = req.body.meal_type || req.body.mealType;
+      const recipeIdVal = req.body.recipe_id || req.body.recipeId;
+      const recipeTitleVal = req.body.recipe_title || req.body.recipeTitle;
       const entry = {
-        id: `mem-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-        weekStart: req.body.week_start || req.body.weekStart || week,
+        id,
+        weekStart: weekVal,
+        week_start: weekVal,
         day: req.body.day,
-        mealType: req.body.meal_type || req.body.mealType,
-        recipeId: req.body.recipe_id || req.body.recipeId,
-        recipeTitle: req.body.recipe_title || req.body.recipeTitle,
+        mealType: mealTypeVal,
+        meal_type: mealTypeVal,
+        recipeId: recipeIdVal,
+        recipe_id: recipeIdVal,
+        recipeTitle: recipeTitleVal,
+        recipe_title: recipeTitleVal,
         createdAt: new Date().toISOString(),
       };
       memoryMealPlans[week] = memoryMealPlans[week] || [];
@@ -202,6 +213,10 @@ export const deleteMealPlanEntry = async (req, res) => {
 
 export const listSubscribers = async (req, res) => {
   try {
+    if (!env.databaseUrl) {
+      return res.json([]);
+    }
+
     const subscribers = await prisma.newsletterSubscriber.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(subscribers);
   } catch (error) {
