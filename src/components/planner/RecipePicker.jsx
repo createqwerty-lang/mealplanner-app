@@ -43,9 +43,32 @@ export default function RecipePicker({ open, onClose, onSelect, mealType }) {
 
     if (!mealType) return true;
 
+    const normalize = (v) =>
+      String(v || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/gi, '')
+        .toLowerCase();
+
     const allowed = categorySynonyms[mealType] || [mealType];
-    return allowed.map((a) => String(a).toLowerCase()).includes(String(r.category || '').toLowerCase());
+    const allowedNorm = allowed.map(normalize).filter(Boolean);
+    const catNorm = normalize(r.category);
+
+    // Match if normalized category equals one of allowed, or includes allowed token
+    const categoryMatch = allowedNorm.some((a) => catNorm === a || catNorm.includes(a) || a.includes(catNorm));
+
+    // also try tags fallback
+    const tagsNorm = (r.tags || []).map(normalize);
+    const tagsMatch = allowedNorm.some((a) => tagsNorm.includes(a) || tagsNorm.some((t) => t.includes(a)));
+
+    return categoryMatch || tagsMatch;
   });
+
+  // If filtered list is empty but there are recipes, fallback to search-only results (avoid blocking user)
+  if (filtered.length === 0 && recipes.length > 0) {
+    const searchOnly = recipes.filter((r) => !search || r.title?.toLowerCase().includes(search.toLowerCase()));
+    if (searchOnly.length > 0) filtered.push(...searchOnly);
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
